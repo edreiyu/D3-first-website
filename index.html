@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+  <head>
+    <title>First crack at18 a website</title>
+  </head>
+  <body>
+    <h1>Hello World!</h1>
+    <p>This is my first crack at it. Now what?</p>
+    <div style="height: 12px"></div>
+    <div class="spacer"></div>
+    <details>
+      <summary>Click here for a surprise!</summary>
+      <p>
+        Surprise! You found the hidden message! This is an interactive html
+        element called a "details" element.
+      </p>
+
+      <p></p>
+      <div class="spacer"></div>
+      <p>
+        You can put any content you want in here, and it will be hidden until
+        the user clicks on the summary element. It's a great way to hide what
+        you been trying to hide all along!
+      </p>
+    </details>
+
+    <details open>
+      <summary>Open Bullet</summary>
+      <p>
+        This is an open bullet. :D No need to click the arrow button to show
+      </p>
+      <p>This is another sentence trying to test the html tag wrap</p>
+    </details>
+
+    <h2>Bar Chart</h2>
+    <div id="chart"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script>
+      const data = [
+        { name: "A", value: 1 },
+        { name: "B", value: 5 },
+        { name: "C", value: 8 },
+        { name: "D", value: 10 },
+      ];
+
+      const margin = { top: 20, right: 20, bottom: 40, left: 40 };
+      const width = 500 - margin.left - margin.right;
+      const height = 280 - margin.top - margin.bottom;
+
+      const svg = d3
+        .select("#chart")
+        .append("svg")
+        .attr(
+          "viewBox",
+          `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`,
+        )
+        .attr("width", "500")
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+      const x = d3
+        .scaleBand()
+        .domain(data.map((d) => d.name))
+        .range([0, width])
+        .padding(0.2);
+
+      const y = d3
+        .scaleLinear()
+        .domain([0, d3.max(data, (d) => d.value)])
+        .nice()
+        .range([height, 0]);
+
+      svg
+        .append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x).tickSize(0));
+
+      svg
+        .append("g")
+        .call(d3.axisLeft(y).ticks(5).tickSize(-width))
+        .call((g) => g.select(".domain").remove())
+        .call((g) =>
+          g
+            .selectAll(".tick line")
+            .attr("stroke", "#ccc")
+            .attr("stroke-dasharray", "3,3"),
+        );
+
+      svg
+        .selectAll(".bar")
+        .data(data)
+        .join("rect")
+        .attr("class", "bar")
+        .attr("x", (d) => x(d.name))
+        .attr("y", (d) => y(d.value))
+        .attr("width", x.bandwidth())
+        .attr("height", (d) => height - y(d.value))
+        .attr("fill", "#534AB7")
+        .attr("rx", 3);
+    </script>
+  </body>
+  <br />
+  <footer>
+    <h3 style="color: #69b3a2">Let's give up!</h3>
+    <span>Contact them at your own risk!</span>
+  </footer>
+</html>
