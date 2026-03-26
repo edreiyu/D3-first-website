@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Exempt Expenditure Shares by Decile</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #fff;
+    color: #111;
+    padding: 2rem;
+  }
+  h2 {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 1.5rem;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px 24px;
+  }
+  .panel-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 3px;
+  }
+  .x-label {
+    font-size: 9px;
+    color: #999;
+    text-align: center;
+    margin-top: 3px;
+  }
+  .footnote {
+    font-size: 11px;
+    color: #999;
+    margin-top: 1.5rem;
+  }
+  .bar { fill: #5b84c4; }
+  .axis path, .axis line { stroke: rgba(0,0,0,0.15); }
+  .axis text { fill: #888; font-size: 8px; font-family: Arial, sans-serif; }
+  .gridline line { stroke: rgba(0,0,0,0.06); stroke-width: 0.8; }
+  .gridline path { display: none; }
+</style>
+</head>
+<body>
+
+<h2>Average ratio of exempt expenditure to total household expenditure, by income decile</h2>
+<p class="subtitle">In percent. Source: Family Income and Expenditure Survey (FIES) 2023.</p>
+
+<div class="grid" id="grid"></div>
+
+<p class="footnote">Note: Each panel uses an independent y-axis scale. Deciles ranked by per capita income.</p>
+
+<script>
+const panels = [
+  { label: "Food",                      data: [41.47,37.39,35.02,32.82,30.85,28.89,26.81,24.46,21.24,15.87] },
+  { label: "Rentals",                   data: [0.16,0.20,0.24,0.28,0.31,0.33,0.33,0.39,0.39,0.32] },
+  { label: "Electricity",               data: [0.53,0.65,0.74,0.81,0.90,0.96,1.02,1.10,1.15,1.17] },
+  { label: "Medicines",                 data: [0.19,0.30,0.39,0.49,0.59,0.68,0.76,0.89,1.00,1.14] },
+  { label: "Private health & diagnostics", data: [0.10,0.12,0.17,0.24,0.28,0.31,0.42,0.57,0.71,1.07] },
+  { label: "Public transport",          data: [2.23,2.41,2.54,2.70,2.75,2.82,2.87,2.83,2.59,1.92] },
+  { label: "International airfare",     data: [0,0.00,0.00,0.01,0.01,0.01,0.01,0.02,0.02,0.13] },
+  { label: "Recreation & sporting",     data: [0.00,0.00,0.01,0.00,0.01,0.01,0.01,0.01,0.01,0.02] },
+  { label: "Gambling",                  data: [0.03,0.05,0.05,0.05,0.06,0.07,0.07,0.07,0.08,0.07] },
+  { label: "Private educ. & misc.",     data: [0.68,0.71,0.74,0.83,0.92,1.05,1.14,1.40,1.71,1.96] },
+  { label: "Insurance",                 data: [0.24,0.46,0.65,0.89,1.16,1.50,1.85,2.37,3.18,4.13] },
+  { label: "Financial services",        data: [0.06,0.10,0.08,0.09,0.07,0.08,0.08,0.09,0.07,0.10] },
+];
+
+const deciles = d3.range(1, 11);
+const margin = { top: 8, right: 8, bottom: 18, left: 28 };
+const W = 180;
+const H = 100;
+const innerW = W - margin.left - margin.right;
+const innerH = H - margin.top - margin.bottom;
+
+const grid = document.getElementById("grid");
+
+panels.forEach((panel, i) => {
+  const wrapper = document.createElement("div");
+
+  const labelEl = document.createElement("p");
+  labelEl.className = "panel-label";
+  labelEl.textContent = panel.label;
+  wrapper.appendChild(labelEl);
+
+  const svg = d3.create("svg")
+    .attr("width", "100%")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .attr("preserveAspectRatio", "xMidYMid meet");
+
+  const g = svg.append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const yMax = d3.max(panel.data) * 1.15;
+  const yMin = 0;
+
+  const x = d3.scaleBand()
+    .domain(deciles)
+    .range([0, innerW])
+    .padding(0.25);
+
+  const y = d3.scaleLinear()
+    .domain([yMin, yMax])
+    .range([innerH, 0]);
+
+  // Horizontal gridlines
+  g.append("g")
+    .attr("class", "gridline")
+    .call(
+      d3.axisLeft(y)
+        .ticks(3)
+        .tickSize(-innerW)
+        .tickFormat("")
+    );
+
+  // X axis
+  g.append("g")
+    .attr("class", "axis")
+    .attr("transform", `translate(0,${innerH})`)
+    .call(
+      d3.axisBottom(x)
+        .tickSize(2)
+        .tickValues([1, 3, 5, 7, 9, 10])
+    )
+    .call(g => g.select(".domain").attr("stroke", "rgba(0,0,0,0.15)"));
+
+  // Y axis
+  g.append("g")
+    .attr("class", "axis")
+    .call(
+      d3.axisLeft(y)
+        .ticks(3)
+        .tickSize(2)
+        .tickFormat(d => d % 1 === 0 ? d : d.toFixed(1))
+    )
+    .call(g => g.select(".domain").remove());
+
+  // Bars
+  g.selectAll(".bar")
+    .data(panel.data)
+    .join("rect")
+    .attr("class", "bar")
+    .attr("x", (d, i) => x(i + 1))
+    .attr("y", d => y(d))
+    .attr("width", x.bandwidth())
+    .attr("height", d => innerH - y(d));
+
+  wrapper.appendChild(svg.node());
+
+  const xLabel = document.createElement("p");
+  xLabel.className = "x-label";
+  xLabel.textContent = "Per capita income decile";
+  wrapper.appendChild(xLabel);
+
+  grid.appendChild(wrapper);
+});
+</script>
+</body>
+</html>

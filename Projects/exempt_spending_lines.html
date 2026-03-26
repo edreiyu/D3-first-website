@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Exempt Expenditure Shares by Decile</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0.5;
+      }
+      body {
+        font-family: system-ui, sans-serif;
+        background: #fff;
+        color: #111;
+        padding: 2rem;
+      }
+      h2 {
+        font-size: 15px;
+        font-weight: 500;
+        margin-bottom: 20px;
+      }
+      .subtitle {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 1.5rem;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 20px 24px;
+      }
+      .panel-label {
+        font-size: 12px;
+        font-weight: 500;
+        color: #080808;
+        margin: 0 0 3px 2px;
+      }
+      .panel-wrap {
+        position: relative;
+        height: 100px;
+      }
+      .x-label {
+        font-size: 9px;
+        color: #4a4a4a;
+        text-align: center;
+        margin-top: 3px;
+      }
+      .footnote {
+        font-size: 11px;
+        color: #4a4a4a;
+        margin-top: 1.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>
+      Average Share of Exempt Expenditures to Total Household Expenditure, by
+      Income Decile (In Percent)
+    </h2>
+    <!-- <p class="subtitle">In percent.</p> -->
+
+    <div class="grid">
+      <div>
+        <p class="panel-label">Food</p>
+        <div class="panel-wrap"><canvas id="c0"></canvas></div>
+        <p class="x-label">Per capita income decile</p>
+      </div>
+      <div>
+        <p class="panel-label">Rentals</p>
+        <div class="panel-wrap"><canvas id="c1"></canvas></div>
+        <p class="x-label">Per capita income decile</p>
+      </div>
+      <div>
+        <p class="panel-label">Renewable Electricity</p>
+        <div class="panel-wrap"><canvas id="c2"></canvas></div>
+        <p class="x-label">Per capita income decile</p>
+      </div>
+      <div>
+        <p class="panel-label">Medicines</p>
+        <div class="panel-wrap"><canvas id="c3"></canvas></div>
+        <p class="x-label">Per capita income decile</p>
+      </div>
+      <div>
+        <p class="panel-label">Private health services</p>
+        <div class="panel-wrap"><canvas id="c4"></canvas></div>
+        <p class="x-label">Per capita income decile</p>
+      </div>
+      <div>
+        <p class="panel-label">Public transport</p>
+        <div class="panel-wrap"><canvas id="c5"></canvas></div>
+        <p class="x-label">Per capita income decile</p>
+      </div>
+      <div>
+        <p class="panel-label">International airfare</p>
+        <div class="panel-wrap"><canvas id="c6"></canvas></div>
+        <p class="x-label">Per capita income decile</p>
+      </div>
+      <div>
+        <p class="panel-label">Recreation activities</p>
+        <div class="panel-wrap"><canvas id="c7"></canvas></div>
+        <p class="x-label">Per capita income decile</p>
+      </div>
+      <div>
+        <p class="panel-label">Gambling</p>
+        <div class="panel-wrap"><canvas id="c8"></canvas></div>
+        <p class="x-label">Per capita income decile</p>
+      </div>
+      <div>
+        <p class="panel-label">Private education</p>
+        <div class="panel-wrap"><canvas id="c9"></canvas></div>
+        <p class="x-label">Per capita income decile</p>
+      </div>
+      <div>
+        <p class="panel-label">Insurance</p>
+        <div class="panel-wrap"><canvas id="c10"></canvas></div>
+        <p class="x-label">Per capita income decile</p>
+      </div>
+      <div>
+        <p class="panel-label">Financial services</p>
+        <div class="panel-wrap"><canvas id="c11"></canvas></div>
+        <p class="x-label">Per capita income decile</p>
+      </div>
+    </div>
+
+    <p class="footnote">
+      Note: Each panel uses an independent y-axis scale. <br />
+      Source: 2023 Family Income and Expenditure Survey (FIES).
+    </p>
+
+    <script>
+      const deciles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+      const series = [
+        [41.47, 37.39, 35.02, 32.82, 30.85, 28.89, 26.81, 24.46, 21.24, 15.87],
+        [0.16, 0.2, 0.24, 0.28, 0.31, 0.33, 0.33, 0.39, 0.39, 0.32],
+        [0.53, 0.65, 0.74, 0.81, 0.9, 0.96, 1.02, 1.1, 1.15, 1.17],
+        [0.19, 0.3, 0.39, 0.49, 0.59, 0.68, 0.76, 0.89, 1.0, 1.14],
+        [0.1, 0.12, 0.17, 0.24, 0.28, 0.31, 0.42, 0.57, 0.71, 1.07],
+        [2.23, 2.41, 2.54, 2.7, 2.75, 2.82, 2.87, 2.83, 2.59, 1.92],
+        [0, 0.0, 0.0, 0.01, 0.01, 0.01, 0.01, 0.02, 0.02, 0.13],
+        [0.0, 0.0, 0.01, 0.0, 0.01, 0.01, 0.01, 0.01, 0.01, 0.02],
+        [0.03, 0.05, 0.05, 0.05, 0.06, 0.07, 0.07, 0.07, 0.08, 0.07],
+        [0.68, 0.71, 0.74, 0.83, 0.92, 1.05, 1.14, 1.4, 1.71, 1.96],
+        [0.24, 0.46, 0.65, 0.89, 1.16, 1.5, 1.85, 2.37, 3.18, 4.13],
+        [0.06, 0.1, 0.08, 0.09, 0.07, 0.08, 0.08, 0.09, 0.07, 0.1],
+      ];
+
+      function makeChart(id, data) {
+        const mn = Math.min(...data);
+        const mx = Math.max(...data);
+        const pad = (mx - mn) * 0.15 || 0.01;
+        new Chart(document.getElementById(id), {
+          type: "line",
+          data: {
+            labels: deciles,
+            datasets: [
+              {
+                data: data,
+                borderColor: "#5b84c4",
+                borderWidth: 2,
+                pointRadius: 0,
+                tension: 0.3,
+                fill: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: { label: (ctx) => ctx.parsed.y.toFixed(2) + "%" },
+              },
+            },
+            scales: {
+              x: {
+                ticks: { color: "#888", font: { size: 9 }, maxTicksLimit: 5 },
+                grid: { display: false },
+                border: { color: "rgba(0,0,0,0.15)" },
+              },
+              y: {
+                min: Math.max(0, mn - pad),
+                max: mx + pad,
+                ticks: {
+                  color: "#888",
+                  font: { size: 9 },
+                  maxTicksLimit: 4,
+                  callback: (v) => v.toFixed(1),
+                },
+                grid: { color: "rgba(0,0,0,0.06)", lineWidth: 0.8 },
+                border: { display: false },
+              },
+            },
+          },
+        });
+      }
+
+      for (let i = 0; i < 12; i++) makeChart("c" + i, series[i]);
+    </script>
+  </body>
+</html>
